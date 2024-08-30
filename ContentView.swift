@@ -26,9 +26,15 @@ struct ContentView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
-                    Text("Arithmetic Game")
+                    Text("ZetaMax")
                         .font(.largeTitle)
                         .fontWeight(.bold)
+                    
+                    // Display the all-time high score 
+                    //removing it for now cuz I dont want it to clog the settings
+                    //Text("All-time High Score: \(UserDefaults.standard.integer(forKey: "HighScore"))")
+                        //.font(.headline)
+                        //.padding(.bottom)
                     
                     Toggle("Addition", isOn: $additionEnabled)
                     if additionEnabled {
@@ -121,8 +127,6 @@ struct ContentView: View {
     }
 }
 
-
-
 struct GameView: View {
     let timeLimit: Int
     let additionEnabled: Bool
@@ -138,6 +142,8 @@ struct GameView: View {
     @State private var timer: Timer?
     @State private var isGameOver: Bool = false
     @Environment(\.presentationMode) var presentationMode
+    
+    @State private var highScore: Int = UserDefaults.standard.integer(forKey: "HighScore")
     
     init(timeLimit: Int, additionEnabled: Bool, subtractionEnabled: Bool, multiplicationEnabled: Bool, divisionEnabled: Bool) {
         self.timeLimit = timeLimit
@@ -156,6 +162,12 @@ struct GameView: View {
                     .font(.largeTitle)
                     .fontWeight(.bold)
                     .padding()
+                
+                // Display high score in smaller text beneath the final score
+                // could add a new best if it is in fact a new best
+                Text("Best: \(highScore)")
+                    .foregroundColor(.gray)
+                    .padding(.top, -10)
                 
                 VStack(spacing: 20) {
                     Button("Try Again") {
@@ -183,8 +195,13 @@ struct GameView: View {
                     
                     Spacer()
                     
-                    Text("Score: \(score)")
-                        .font(.headline)
+                    VStack(alignment: .trailing) {
+                        Text("Best: \(highScore)")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                        Text("Score: \(score)")
+                            .font(.headline)
+                    }
                 }
                 .padding([.leading, .trailing, .top])
                 
@@ -265,6 +282,11 @@ struct GameView: View {
     }
     
     func endGame() {
+        // Check if the current score is the highest, and save it if it is
+        if score > highScore {
+            highScore = score
+            UserDefaults.standard.set(highScore, forKey: "HighScore")
+        }
         isGameOver = true
     }
     
@@ -276,14 +298,9 @@ struct GameView: View {
     }
 }
 
-
-
-
-
-struct ZetamacCloneApp: App {
-    var body: some Scene {
-        WindowGroup {
-            ContentView()
-        }
+//added this back so I wouldn't have to make a build every time lol
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
     }
 }
