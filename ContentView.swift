@@ -6,9 +6,10 @@ struct ContentView: View {
     @State private var multiplicationEnabled = true
     @State private var divisionEnabled = true
     
-    // Ranges for the operations
-    @State private var additionRange1: String = "2"
-    @State private var additionRange2: String = "100"
+    @State private var lbaddition1: String = "2"
+    @State private var ubaddition1: String = "100"
+    @State private var lbaddition2: String = "2"
+    @State private var ubaddition2: String = "100"
     @State private var multiplicationRange1: String = "2"
     @State private var multiplicationRange2: String = "12"
     @State private var multiplicationRange3: String = "2"
@@ -17,7 +18,6 @@ struct ContentView: View {
     @State private var timeLimit = 120
     @State private var isGameActive = false
     
-    // Computed property to check if at least one operation is enabled
     private var isAtLeastOneOperationEnabled: Bool {
         return additionEnabled || subtractionEnabled || multiplicationEnabled || divisionEnabled
     }
@@ -30,11 +30,7 @@ struct ContentView: View {
                         .font(.largeTitle)
                         .fontWeight(.bold)
                     
-                    // Display the all-time high score 
-                    //removing it for now cuz I dont want it to clog the settings
-                    //Text("All-time High Score: \(UserDefaults.standard.integer(forKey: "HighScore"))")
-                        //.font(.headline)
-                        //.padding(.bottom)
+                    Spacer()
                     
                     Toggle("Addition", isOn: $additionEnabled)
                     if additionEnabled {
@@ -42,22 +38,22 @@ struct ContentView: View {
                             Text("Range:")
                             HStack {
                                 Text("(")
-                                TextField("2", text: $additionRange1)
+                                TextField("2", text: $lbaddition1)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .keyboardType(.numberPad)
                                     .frame(width: 50)
                                 Text(" to ")
-                                TextField("100", text: $additionRange2)
+                                TextField("100", text: $ubaddition1)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .keyboardType(.numberPad)
                                     .frame(width: 50)
                                 Text(") + (")
-                                TextField("2", text: $additionRange1)
+                                TextField("2", text: $lbaddition2)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .keyboardType(.numberPad)
                                     .frame(width: 50)
                                 Text(" to ")
-                                TextField("100", text: $additionRange2)
+                                TextField("100", text: $ubaddition2)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .keyboardType(.numberPad)
                                     .frame(width: 50)
@@ -109,7 +105,13 @@ struct ContentView: View {
                     }
                     .pickerStyle(MenuPickerStyle())
                     
+                    Spacer()
                     Button("Start") {
+                        // Validate ranges before starting the game
+                        guard validateRanges() else {
+                            // Show an alert or handle invalid ranges
+                            return
+                        }
                         isGameActive = true
                     }
                     .padding()
@@ -118,12 +120,33 @@ struct ContentView: View {
                     .cornerRadius(10)
                     .disabled(!isAtLeastOneOperationEnabled)
                     .navigationDestination(isPresented: $isGameActive) {
-                        GameView(timeLimit: timeLimit, additionEnabled: additionEnabled, subtractionEnabled: subtractionEnabled, multiplicationEnabled: multiplicationEnabled, divisionEnabled: divisionEnabled)
+                        GameView(
+                            timeLimit: timeLimit,
+                            additionEnabled: additionEnabled,
+                            subtractionEnabled: subtractionEnabled,
+                            multiplicationEnabled: multiplicationEnabled,
+                            divisionEnabled: divisionEnabled,
+                            additionLowerBound1: Int(lbaddition1) ?? 2,
+                            additionUpperBound1: Int(ubaddition1) ?? 100,
+                            additionLowerBound2: Int(lbaddition2) ?? 2,
+                            additionUpperBound2: Int(ubaddition2) ?? 100,
+                            multiplicationLowerBound1: Int(multiplicationRange1) ?? 2,
+                            multiplicationUpperBound2: Int(multiplicationRange2) ?? 12,
+                            multiplicationLowerBound3: Int(multiplicationRange3) ?? 2,
+                            multiplicationUpperBound4: Int(multiplicationRange4) ?? 100
+                        )
                     }
                 }
                 .padding()
             }
         }
+    }
+    
+    func validateRanges() -> Bool {
+        return Int(lbaddition1) ?? 2 <= Int(ubaddition1) ?? 100 &&
+               Int(lbaddition2) ?? 2 <= Int(ubaddition2) ?? 100 &&
+               Int(multiplicationRange1) ?? 2 <= Int(multiplicationRange2) ?? 12 &&
+               Int(multiplicationRange3) ?? 2 <= Int(multiplicationRange4) ?? 100
     }
 }
 
@@ -133,6 +156,15 @@ struct GameView: View {
     let subtractionEnabled: Bool
     let multiplicationEnabled: Bool
     let divisionEnabled: Bool
+    
+    let additionLowerBound1: Int
+    let additionUpperBound1: Int
+    let additionLowerBound2: Int
+    let additionUpperBound2: Int
+    let multiplicationLowerBound1: Int
+    let multiplicationUpperBound2: Int
+    let multiplicationLowerBound3: Int
+    let multiplicationUpperBound4: Int
     
     @State private var timeLeft: Int
     @State private var score: Int = 0
@@ -144,30 +176,42 @@ struct GameView: View {
     @Environment(\.presentationMode) var presentationMode
     
     @State private var highScore: Int = UserDefaults.standard.integer(forKey: "HighScore")
+    @State private var isNewHighScore: Bool = false
     
-    init(timeLimit: Int, additionEnabled: Bool, subtractionEnabled: Bool, multiplicationEnabled: Bool, divisionEnabled: Bool) {
+    init(timeLimit: Int, additionEnabled: Bool, subtractionEnabled: Bool, multiplicationEnabled: Bool, divisionEnabled: Bool, additionLowerBound1: Int, additionUpperBound1: Int, additionLowerBound2: Int, additionUpperBound2: Int, multiplicationLowerBound1: Int, multiplicationUpperBound2: Int, multiplicationLowerBound3: Int, multiplicationUpperBound4: Int) {
         self.timeLimit = timeLimit
         self.additionEnabled = additionEnabled
         self.subtractionEnabled = subtractionEnabled
         self.multiplicationEnabled = multiplicationEnabled
         self.divisionEnabled = divisionEnabled
+        self.additionLowerBound1 = additionLowerBound1
+        self.additionUpperBound1 = additionUpperBound1
+        self.additionLowerBound2 = additionLowerBound2
+        self.additionUpperBound2 = additionUpperBound2
+        self.multiplicationLowerBound1 = multiplicationLowerBound1
+        self.multiplicationUpperBound2 = multiplicationUpperBound2
+        self.multiplicationLowerBound3 = multiplicationLowerBound3
+        self.multiplicationUpperBound4 = multiplicationUpperBound4
         _timeLeft = State(initialValue: timeLimit)
     }
     
     var body: some View {
         VStack {
             if isGameOver {
-                // Game over view
                 Text("Score: \(score)")
                     .font(.largeTitle)
                     .fontWeight(.bold)
                     .padding()
                 
-                // Display high score in smaller text beneath the final score
-                // could add a new best if it is in fact a new best
-                Text("Best: \(highScore)")
-                    .foregroundColor(.gray)
-                    .padding(.top, -10)
+                if isNewHighScore {
+                    Text("New Best: \(highScore)")
+                        .foregroundColor(.green)
+                        .padding(.top, -10)
+                } else {
+                    Text("Best: \(highScore)")
+                        .foregroundColor(.gray)
+                        .padding(.top, -10)
+                }
                 
                 VStack(spacing: 20) {
                     Button("Try Again") {
@@ -187,7 +231,6 @@ struct GameView: View {
                     .cornerRadius(10)
                 }
             } else {
-                // Game in progress view
                 HStack {
                     Text("Seconds left: \(timeLeft)")
                         .font(.headline)
@@ -243,25 +286,36 @@ struct GameView: View {
     func generateQuestion() {
         let operation = selectOperation()
         
-        let random1 = Int.random(in: 2...100)
-        let random2 = operation == "*" || operation == "/" ? Int.random(in: 2...12) : Int.random(in: 2...100)
+        var random1: Int
+        var random2: Int
         
         switch operation {
         case "+":
+            random1 = Int.random(in: additionLowerBound1...additionUpperBound1)
+            random2 = Int.random(in: additionLowerBound2...additionUpperBound2)
             currentQuestion = "\(random1) + \(random2) = ?"
             correctAnswer = random1 + random2
         case "-":
+            random1 = Int.random(in: additionLowerBound1...additionUpperBound1)
+            random2 = Int.random(in: additionLowerBound2...additionUpperBound2)
             currentQuestion = "\(random1 + random2) - \(random2) = ?"
             correctAnswer = random1
         case "*":
+            random1 = Int.random(in: multiplicationLowerBound1...multiplicationUpperBound4)
+            random2 = Int.random(in: multiplicationLowerBound3...multiplicationUpperBound2)
             currentQuestion = "\(random1) * \(random2) = ?"
             correctAnswer = random1 * random2
         case "/":
-            currentQuestion = "\(random1 * random2) / \(random2) = ?"
-            correctAnswer = random1
+            repeat {
+                random1 = Int.random(in: multiplicationLowerBound1...multiplicationUpperBound4)
+                random2 = Int.random(in: multiplicationLowerBound3...multiplicationUpperBound2)
+            } while random2 == 0 || random1 % random2 != 0
+            currentQuestion = "\(random1) / \(random2) = ?"
+            correctAnswer = random1 / random2
         default:
             break
         }
+        
         userAnswer = ""
     }
     
@@ -269,6 +323,8 @@ struct GameView: View {
         if let answer = Int(userAnswer), answer == correctAnswer {
             score += 1
             generateQuestion()
+        } else if userAnswer.count >= correctAnswer.description.count {
+            userAnswer = ""
         }
     }
     
@@ -282,10 +338,12 @@ struct GameView: View {
     }
     
     func endGame() {
-        // Check if the current score is the highest, and save it if it is
         if score > highScore {
             highScore = score
             UserDefaults.standard.set(highScore, forKey: "HighScore")
+            isNewHighScore = true
+        } else {
+            isNewHighScore = false
         }
         isGameOver = true
     }
@@ -294,11 +352,11 @@ struct GameView: View {
         score = 0
         timeLeft = timeLimit
         isGameOver = false
+        isNewHighScore = false
         startGame()
     }
 }
 
-//added this back so I wouldn't have to make a build every time lol
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
