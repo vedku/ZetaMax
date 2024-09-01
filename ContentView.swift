@@ -10,10 +10,21 @@ struct ContentView: View {
     @State private var ubaddition1: String = "100"
     @State private var lbaddition2: String = "2"
     @State private var ubaddition2: String = "100"
-    @State private var multiplicationRange1: String = "2"
-    @State private var multiplicationRange2: String = "12"
-    @State private var multiplicationRange3: String = "2"
-    @State private var multiplicationRange4: String = "100"
+    
+    @State private var lbsubtraction1: String = "2"
+    @State private var ubsubtraction1: String = "100"
+    @State private var lbsubtraction2: String = "2"
+    @State private var ubsubtraction2: String = "100"
+    
+    @State private var lbmultiplication1: String = "2"
+    @State private var ubmultiplication1: String = "12"
+    @State private var lbmultiplication2: String = "2"
+    @State private var ubmultiplication2: String = "100"
+    
+    @State private var lbdivision1: String = "2"
+    @State private var ubdivision1: String = "100"
+    @State private var lbdivision2: String = "2"
+    @State private var ubdivision2: String = "12"
     
     @State private var timeLimit = 120
     @State private var isGameActive = false
@@ -25,11 +36,11 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 20) {
+                VStack(spacing: 13.8) {
                     Text("ZetaMax")
                         .font(.largeTitle)
                         .fontWeight(.bold)
-                    
+
                     Spacer()
                     
                     Toggle("Addition", isOn: $additionEnabled)
@@ -37,7 +48,6 @@ struct ContentView: View {
                         .fontWeight(.bold)
                     if additionEnabled {
                         VStack(alignment: .leading) {
-                            
                             Text("Range:")
                                 .offset(y:-10)
                             HStack {
@@ -67,70 +77,109 @@ struct ContentView: View {
                         }
                     }
                                         
-                    HStack {
-                        Text("Subtraction ")
-                            .font(.title3)
-                            .fontWeight(.bold)
-                        Text("(same range as addition)")
-                            .font(.subheadline)
-
-                        Toggle("", isOn: $subtractionEnabled)
-                            .labelsHidden()
-                            .padding(.leading, 10)
-                    }
-                    
-                
-                    
-                    Toggle("Multiplication", isOn: $multiplicationEnabled)
-                        .font(.title3)
+                    Toggle("Subtraction", isOn: $subtractionEnabled)
+                        .font(.title2)
                         .fontWeight(.bold)
-                    if multiplicationEnabled {
+                    if subtractionEnabled {
                         VStack(alignment: .leading) {
                             Text("Range:")
                                 .offset(y:-10)
-
                             HStack {
                                 Text("(")
-                                TextField("2", text: $multiplicationRange1)
+                                TextField("2", text: $lbsubtraction1)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .keyboardType(.numberPad)
                                     .frame(width: 50)
                                 Text(" to ")
-                                TextField("12", text: $multiplicationRange2)
+                                TextField("100", text: $ubsubtraction1)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .keyboardType(.numberPad)
                                     .frame(width: 50)
-                                Text(") × (")
-                                TextField("2", text: $multiplicationRange3)
+                                Text(") - (")
+                                TextField("2", text: $lbsubtraction2)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .keyboardType(.numberPad)
                                     .frame(width: 50)
                                 Text(" to ")
-                                TextField("100", text: $multiplicationRange4)
+                                TextField("100", text: $ubsubtraction2)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .keyboardType(.numberPad)
                                     .frame(width: 50)
                                 Text(")")
                             }
                             .offset(y:-10)
-
                         }
                     }
                     
-                    HStack {
-                        Text("Division ")
-                            .font(.title3)
-                            .fontWeight(.bold)
-                        Text("(same range as multiplication)")
-                            .font(.subheadline)
-
-                        Toggle("", isOn: $divisionEnabled)
-                            .labelsHidden()
-                            .padding(.leading, 10)
+                    Toggle("Multiplication", isOn: $multiplicationEnabled)
+                        .font(.title2)
+                        .fontWeight(.bold)
+                    if multiplicationEnabled {
+                        VStack(alignment: .leading) {
+                            Text("Range:")
+                                .offset(y:-10)
+                            HStack {
+                                Text("(")
+                                TextField("2", text: $lbmultiplication1)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .keyboardType(.numberPad)
+                                    .frame(width: 50)
+                                Text(" to ")
+                                TextField("12", text: $ubmultiplication1)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .keyboardType(.numberPad)
+                                    .frame(width: 50)
+                                Text(") × (")
+                                TextField("2", text: $lbmultiplication2)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .keyboardType(.numberPad)
+                                    .frame(width: 50)
+                                Text(" to ")
+                                TextField("100", text: $ubmultiplication2)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .keyboardType(.numberPad)
+                                    .frame(width: 50)
+                                Text(")")
+                            }
+                            .offset(y:-10)
+                        }
                     }
-                    .offset(y:-4)
                     
-                    Spacer()
+                    Toggle("Division", isOn: $divisionEnabled)
+                        .font(.title2)
+                        .fontWeight(.bold)
+                    if divisionEnabled {
+                        VStack(alignment: .leading) {
+                            Text("Range:")
+                                .offset(y:-10)
+                            HStack {
+                                Text("(")
+                                TextField("2", text: $lbdivision1)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .keyboardType(.numberPad)
+                                    .frame(width: 50)
+                                Text(" to ")
+                                TextField("100", text: $ubdivision1)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .keyboardType(.numberPad)
+                                    .frame(width: 50)
+                                Text(") ÷ (")
+                                TextField("2", text: $lbdivision2)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .keyboardType(.numberPad)
+                                    .frame(width: 50)
+                                Text(" to ")
+                                TextField("12", text: $ubdivision2)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .keyboardType(.numberPad)
+                                    .frame(width: 50)
+                                Text(")")
+                            }
+                            .offset(y:-10)
+                        }
+                    }
+                    
+                    
                     Picker("Duration", selection: $timeLimit) {
                         Text("30 seconds").tag(30)
                         Text("60 seconds").tag(60)
@@ -141,8 +190,8 @@ struct ContentView: View {
                     .pickerStyle(MenuPickerStyle())
                     
                     Spacer()
+                    
                     Button("Start") {
-                        // Validate ranges before starting the game
                         guard validateRanges() else {
                             // Show an alert or handle invalid ranges
                             return
@@ -165,10 +214,18 @@ struct ContentView: View {
                             additionUpperBound1: Int(ubaddition1) ?? 100,
                             additionLowerBound2: Int(lbaddition2) ?? 2,
                             additionUpperBound2: Int(ubaddition2) ?? 100,
-                            multiplicationLowerBound1: Int(multiplicationRange1) ?? 2,
-                            multiplicationUpperBound2: Int(multiplicationRange2) ?? 12,
-                            multiplicationLowerBound3: Int(multiplicationRange3) ?? 2,
-                            multiplicationUpperBound4: Int(multiplicationRange4) ?? 100
+                            subtractionLowerBound1: Int(lbsubtraction1) ?? 2,
+                            subtractionUpperBound1: Int(ubsubtraction1) ?? 100,
+                            subtractionLowerBound2: Int(lbsubtraction2) ?? 2,
+                            subtractionUpperBound2: Int(ubsubtraction2) ?? 100,
+                            multiplicationLowerBound1: Int(lbmultiplication1) ?? 2,
+                            multiplicationUpperBound1: Int(ubmultiplication1) ?? 12,
+                            multiplicationLowerBound2: Int(lbmultiplication2) ?? 2,
+                            multiplicationUpperBound2: Int(ubmultiplication2) ?? 100,
+                            divisionLowerBound1: Int(lbdivision1) ?? 2,
+                            divisionUpperBound1: Int(ubdivision1) ?? 100,
+                            divisionLowerBound2: Int(lbdivision2) ?? 2,
+                            divisionUpperBound2: Int(ubdivision2) ?? 12
                         )
                     }
                 }
@@ -180,8 +237,12 @@ struct ContentView: View {
     func validateRanges() -> Bool {
         return Int(lbaddition1) ?? 2 <= Int(ubaddition1) ?? 100 &&
                Int(lbaddition2) ?? 2 <= Int(ubaddition2) ?? 100 &&
-               Int(multiplicationRange1) ?? 2 <= Int(multiplicationRange2) ?? 12 &&
-               Int(multiplicationRange3) ?? 2 <= Int(multiplicationRange4) ?? 100
+               Int(lbsubtraction1) ?? 2 <= Int(ubsubtraction1) ?? 100 &&
+               Int(lbsubtraction2) ?? 2 <= Int(ubsubtraction2) ?? 100 &&
+               Int(lbmultiplication1) ?? 2 <= Int(ubmultiplication1) ?? 12 &&
+               Int(lbmultiplication2) ?? 2 <= Int(ubmultiplication2) ?? 100 &&
+               Int(lbdivision1) ?? 2 <= Int(ubdivision1) ?? 100 &&
+               Int(lbdivision2) ?? 2 <= Int(ubdivision2) ?? 12
     }
 }
 
@@ -196,10 +257,18 @@ struct GameView: View {
     let additionUpperBound1: Int
     let additionLowerBound2: Int
     let additionUpperBound2: Int
+    let subtractionLowerBound1: Int
+    let subtractionUpperBound1: Int
+    let subtractionLowerBound2: Int
+    let subtractionUpperBound2: Int
     let multiplicationLowerBound1: Int
+    let multiplicationUpperBound1: Int
+    let multiplicationLowerBound2: Int
     let multiplicationUpperBound2: Int
-    let multiplicationLowerBound3: Int
-    let multiplicationUpperBound4: Int
+    let divisionLowerBound1: Int
+    let divisionUpperBound1: Int
+    let divisionLowerBound2: Int
+    let divisionUpperBound2: Int
     
     @State private var timeLeft: Int
     @State private var score: Int = 0
@@ -213,7 +282,7 @@ struct GameView: View {
     @State private var highScore: Int = UserDefaults.standard.integer(forKey: "HighScore")
     @State private var isNewHighScore: Bool = false
     
-    init(timeLimit: Int, additionEnabled: Bool, subtractionEnabled: Bool, multiplicationEnabled: Bool, divisionEnabled: Bool, additionLowerBound1: Int, additionUpperBound1: Int, additionLowerBound2: Int, additionUpperBound2: Int, multiplicationLowerBound1: Int, multiplicationUpperBound2: Int, multiplicationLowerBound3: Int, multiplicationUpperBound4: Int) {
+    init(timeLimit: Int, additionEnabled: Bool, subtractionEnabled: Bool, multiplicationEnabled: Bool, divisionEnabled: Bool, additionLowerBound1: Int, additionUpperBound1: Int, additionLowerBound2: Int, additionUpperBound2: Int, subtractionLowerBound1: Int, subtractionUpperBound1: Int, subtractionLowerBound2: Int, subtractionUpperBound2: Int, multiplicationLowerBound1: Int, multiplicationUpperBound1: Int, multiplicationLowerBound2: Int, multiplicationUpperBound2: Int, divisionLowerBound1: Int, divisionUpperBound1: Int, divisionLowerBound2: Int, divisionUpperBound2: Int) {
         self.timeLimit = timeLimit
         self.additionEnabled = additionEnabled
         self.subtractionEnabled = subtractionEnabled
@@ -223,10 +292,18 @@ struct GameView: View {
         self.additionUpperBound1 = additionUpperBound1
         self.additionLowerBound2 = additionLowerBound2
         self.additionUpperBound2 = additionUpperBound2
+        self.subtractionLowerBound1 = subtractionLowerBound1
+        self.subtractionUpperBound1 = subtractionUpperBound1
+        self.subtractionLowerBound2 = subtractionLowerBound2
+        self.subtractionUpperBound2 = subtractionUpperBound2
         self.multiplicationLowerBound1 = multiplicationLowerBound1
+        self.multiplicationUpperBound1 = multiplicationUpperBound1
+        self.multiplicationLowerBound2 = multiplicationLowerBound2
         self.multiplicationUpperBound2 = multiplicationUpperBound2
-        self.multiplicationLowerBound3 = multiplicationLowerBound3
-        self.multiplicationUpperBound4 = multiplicationUpperBound4
+        self.divisionLowerBound1 = divisionLowerBound1
+        self.divisionUpperBound1 = divisionUpperBound1
+        self.divisionLowerBound2 = divisionLowerBound2
+        self.divisionUpperBound2 = divisionUpperBound2
         _timeLeft = State(initialValue: timeLimit)
     }
     
@@ -331,19 +408,19 @@ struct GameView: View {
             currentQuestion = "\(random1) + \(random2) = ?"
             correctAnswer = random1 + random2
         case "-":
-            random1 = Int.random(in: additionLowerBound1...additionUpperBound1)
-            random2 = Int.random(in: additionLowerBound2...additionUpperBound2)
+            random1 = Int.random(in: subtractionLowerBound1...subtractionUpperBound1)
+            random2 = Int.random(in: subtractionLowerBound2...subtractionUpperBound2)
             currentQuestion = "\(random1 + random2) - \(random2) = ?"
             correctAnswer = random1
         case "*":
-            random1 = Int.random(in: multiplicationLowerBound1...multiplicationUpperBound4)
-            random2 = Int.random(in: multiplicationLowerBound3...multiplicationUpperBound2)
+            random1 = Int.random(in: multiplicationLowerBound1...multiplicationUpperBound2)
+            random2 = Int.random(in: multiplicationLowerBound2...multiplicationUpperBound1)
             currentQuestion = "\(random1) * \(random2) = ?"
             correctAnswer = random1 * random2
         case "/":
             repeat {
-                random1 = Int.random(in: multiplicationLowerBound1...multiplicationUpperBound4)
-                random2 = Int.random(in: multiplicationLowerBound3...multiplicationUpperBound2)
+                random1 = Int.random(in: divisionLowerBound1...divisionUpperBound1)
+                random2 = Int.random(in: divisionLowerBound2...divisionUpperBound2)
             } while random2 == 0 || random1 % random2 != 0
             currentQuestion = "\(random1) / \(random2) = ?"
             correctAnswer = random1 / random2
