@@ -33,9 +33,13 @@ struct ContentView: View {
                     Spacer()
                     
                     Toggle("Addition", isOn: $additionEnabled)
+                        .font(.title2)
+                        .fontWeight(.bold)
                     if additionEnabled {
                         VStack(alignment: .leading) {
+                            
                             Text("Range:")
+                                .offset(y:-10)
                             HStack {
                                 Text("(")
                                 TextField("2", text: $lbaddition1)
@@ -59,15 +63,32 @@ struct ContentView: View {
                                     .frame(width: 50)
                                 Text(")")
                             }
+                            .offset(y:-10)
                         }
                     }
+                                        
+                    HStack {
+                        Text("Subtraction ")
+                            .font(.title3)
+                            .fontWeight(.bold)
+                        Text("(same range as addition)")
+                            .font(.subheadline)
+
+                        Toggle("", isOn: $subtractionEnabled)
+                            .labelsHidden()
+                            .padding(.leading, 10)
+                    }
                     
-                    Toggle("Subtraction (same range as Addition)", isOn: $subtractionEnabled)
+                
                     
                     Toggle("Multiplication", isOn: $multiplicationEnabled)
+                        .font(.title3)
+                        .fontWeight(.bold)
                     if multiplicationEnabled {
                         VStack(alignment: .leading) {
                             Text("Range:")
+                                .offset(y:-10)
+
                             HStack {
                                 Text("(")
                                 TextField("2", text: $multiplicationRange1)
@@ -91,11 +112,25 @@ struct ContentView: View {
                                     .frame(width: 50)
                                 Text(")")
                             }
+                            .offset(y:-10)
+
                         }
                     }
                     
-                    Toggle("Division (same range as Multiplication)", isOn: $divisionEnabled)
+                    HStack {
+                        Text("Division ")
+                            .font(.title3)
+                            .fontWeight(.bold)
+                        Text("(same range as multiplication)")
+                            .font(.subheadline)
+
+                        Toggle("", isOn: $divisionEnabled)
+                            .labelsHidden()
+                            .padding(.leading, 10)
+                    }
+                    .offset(y:-4)
                     
+                    Spacer()
                     Picker("Duration", selection: $timeLimit) {
                         Text("30 seconds").tag(30)
                         Text("60 seconds").tag(60)
