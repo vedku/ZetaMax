@@ -99,6 +99,16 @@ struct HomeView: View {
                         .cornerRadius(10)
                 }
                 
+                // Add "View Data" Button
+                NavigationLink(destination: ScoreGraphView()) {
+                    Text("View Data")
+                        .font(.title)
+                        .padding()
+                        .background(Color.green)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+
                 Spacer()
             }
             .padding()

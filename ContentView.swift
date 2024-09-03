@@ -390,9 +390,13 @@ struct GameView: View {
         } else {
             isNewHighScore = false
         }
+                var scores = UserDefaults.standard.array(forKey: "Scores") as? [[String: Any]] ?? []
+        scores.append(["date": Date(), "score": score])
+        UserDefaults.standard.set(scores, forKey: "Scores")
+        
         isGameOver = true
     }
-    
+
     func restartGame() {
         score = 0
         timeLeft = timeLimit
