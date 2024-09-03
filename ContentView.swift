@@ -29,6 +29,8 @@ struct ContentView: View {
     @State private var timeLimit = 120
     @State private var isGameActive = false
     
+    @AppStorage("isDarkMode") private var isDarkMode = false
+    
     private var isAtLeastOneOperationEnabled: Bool {
         return additionEnabled || subtractionEnabled || multiplicationEnabled || divisionEnabled
     }
@@ -36,7 +38,7 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 13.8) {
+                VStack(spacing: 11) {
                     Text("ZetaMax")
                         .font(.largeTitle)
                         .fontWeight(.bold)
@@ -56,21 +58,38 @@ struct ContentView: View {
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .keyboardType(.numberPad)
                                     .frame(width: 50)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 5)
+                                            .stroke(Color.gray, lineWidth: 1)
+                                    )
+
                                 Text(" to ")
                                 TextField("100", text: $ubaddition1)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .keyboardType(.numberPad)
                                     .frame(width: 50)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 5)
+                                            .stroke(Color.gray, lineWidth: 1)
+                                    )
                                 Text(") + (")
                                 TextField("2", text: $lbaddition2)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .keyboardType(.numberPad)
                                     .frame(width: 50)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 5)
+                                            .stroke(Color.gray, lineWidth: 1)
+                                    )
                                 Text(" to ")
                                 TextField("100", text: $ubaddition2)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .keyboardType(.numberPad)
                                     .frame(width: 50)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 5)
+                                            .stroke(Color.gray, lineWidth: 1)
+                                    )
                                 Text(")")
                             }
                             .offset(y:-10)
@@ -90,21 +109,37 @@ struct ContentView: View {
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .keyboardType(.numberPad)
                                     .frame(width: 50)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 5)
+                                            .stroke(Color.gray, lineWidth: 1)
+                                    )
                                 Text(" to ")
                                 TextField("100", text: $ubsubtraction1)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .keyboardType(.numberPad)
                                     .frame(width: 50)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 5)
+                                            .stroke(Color.gray, lineWidth: 1)
+                                    )
                                 Text(") - (")
                                 TextField("2", text: $lbsubtraction2)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .keyboardType(.numberPad)
                                     .frame(width: 50)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 5)
+                                            .stroke(Color.gray, lineWidth: 1)
+                                    )
                                 Text(" to ")
                                 TextField("100", text: $ubsubtraction2)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .keyboardType(.numberPad)
                                     .frame(width: 50)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 5)
+                                            .stroke(Color.gray, lineWidth: 1)
+                                    )
                                 Text(")")
                             }
                             .offset(y:-10)
@@ -124,21 +159,37 @@ struct ContentView: View {
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .keyboardType(.numberPad)
                                     .frame(width: 50)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 5)
+                                            .stroke(Color.gray, lineWidth: 1)
+                                    )
                                 Text(" to ")
                                 TextField("12", text: $ubmultiplication1)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .keyboardType(.numberPad)
                                     .frame(width: 50)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 5)
+                                            .stroke(Color.gray, lineWidth: 1)
+                                    )
                                 Text(") × (")
                                 TextField("2", text: $lbmultiplication2)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .keyboardType(.numberPad)
                                     .frame(width: 50)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 5)
+                                            .stroke(Color.gray, lineWidth: 1)
+                                    )
                                 Text(" to ")
                                 TextField("100", text: $ubmultiplication2)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .keyboardType(.numberPad)
                                     .frame(width: 50)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 5)
+                                            .stroke(Color.gray, lineWidth: 1)
+                                    )
                                 Text(")")
                             }
                             .offset(y:-10)
@@ -158,21 +209,37 @@ struct ContentView: View {
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .keyboardType(.numberPad)
                                     .frame(width: 50)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 5)
+                                            .stroke(Color.gray, lineWidth: 1)
+                                    )
                                 Text(" to ")
                                 TextField("100", text: $ubdivision1)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .keyboardType(.numberPad)
                                     .frame(width: 50)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 5)
+                                            .stroke(Color.gray, lineWidth: 1)
+                                    )
                                 Text(") ÷ (")
                                 TextField("2", text: $lbdivision2)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .keyboardType(.numberPad)
                                     .frame(width: 50)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 5)
+                                            .stroke(Color.gray, lineWidth: 1)
+                                    )
                                 Text(" to ")
                                 TextField("12", text: $ubdivision2)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .keyboardType(.numberPad)
                                     .frame(width: 50)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 5)
+                                            .stroke(Color.gray, lineWidth: 1)
+                                    )
                                 Text(")")
                             }
                             .offset(y:-10)
@@ -190,7 +257,15 @@ struct ContentView: View {
                     .pickerStyle(MenuPickerStyle())
                     
                     Spacer()
-                    
+
+                    Button(action: {
+                        self.isDarkMode.toggle()
+                    }) {
+                        Image(systemName: isDarkMode ? "sun.max.fill" : "moon.fill")
+                            .font(.title)
+                            .foregroundColor(isDarkMode ? .white : .primary)
+                    }.offset(y:-6)
+                    Spacer()
                     Button("Start") {
                         guard validateRanges() else {
                             // Show an alert or handle invalid ranges
@@ -232,6 +307,7 @@ struct ContentView: View {
                 .padding()
             }
         }
+        .preferredColorScheme(isDarkMode ? .dark : .light)
     }
     
     func validateRanges() -> Bool {
