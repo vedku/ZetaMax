@@ -1,5 +1,6 @@
 import SwiftUI
 
+
 struct ContentView: View {
     @State private var additionEnabled = true
     @State private var subtractionEnabled = true
@@ -51,7 +52,7 @@ struct ContentView: View {
                     if additionEnabled {
                         VStack(alignment: .leading) {
                             Text("Range:")
-                                .offset(y:-10)
+                                .offset(y: -10)
                             HStack {
                                 Text("(")
                                 CustomTextField(text: $lbaddition1)
@@ -66,7 +67,7 @@ struct ContentView: View {
                                 CustomTextField(text: $ubaddition2)
                                 Text(")")
                             }
-                            .offset(y:-10)
+                            .offset(y: -10)
                         }
                     }
                     
@@ -76,7 +77,7 @@ struct ContentView: View {
                     if subtractionEnabled {
                         VStack(alignment: .leading) {
                             Text("Range:")
-                                .offset(y:-10)
+                                .offset(y: -10)
                             HStack {
                                 Text("(")
                                 CustomTextField(text: $lbsubtraction1)
@@ -91,7 +92,7 @@ struct ContentView: View {
                                 CustomTextField(text: $ubsubtraction2)
                                 Text(")")
                             }
-                            .offset(y:-10)
+                            .offset(y: -10)
                         }
                     }
                     
@@ -101,7 +102,7 @@ struct ContentView: View {
                     if multiplicationEnabled {
                         VStack(alignment: .leading) {
                             Text("Range:")
-                                .offset(y:-10)
+                                .offset(y: -10)
                             HStack {
                                 Text("(")
                                 CustomTextField(text: $lbmultiplication1)
@@ -116,7 +117,7 @@ struct ContentView: View {
                                 CustomTextField(text: $ubmultiplication2)
                                 Text(")")
                             }
-                            .offset(y:-10)
+                            .offset(y: -10)
                         }
                     }
                     
@@ -126,7 +127,7 @@ struct ContentView: View {
                     if divisionEnabled {
                         VStack(alignment: .leading) {
                             Text("Range:")
-                                .offset(y:-10)
+                                .offset(y: -10)
                             HStack {
                                 Text("(")
                                 CustomTextField(text: $lbdivision1)
@@ -141,7 +142,7 @@ struct ContentView: View {
                                 CustomTextField(text: $ubdivision2)
                                 Text(")")
                             }
-                            .offset(y:-10)
+                            .offset(y: -10)
                         }
                     }
                     
@@ -162,16 +163,17 @@ struct ContentView: View {
                         Image(systemName: isDarkMode ? "sun.max.fill" : "moon.fill")
                             .font(.title)
                             .foregroundColor(isDarkMode ? .white : .primary)
-                    }.offset(y:-6)
+                    }.offset(y: -6)
                     
                     Spacer()
                     
                     Button("Start") {
-                        guard validateRanges() else {
-                            // Show an alert or handle invalid ranges
-                            return
+                        if validateRanges() && isAtLeastOneOperationEnabled {
+                            isGameActive = true
+                        } else {
+                            // Handle invalid input or no operation selected
+                            // Show an alert or some feedback
                         }
-                        isGameActive = true
                     }
                     .padding()
                     .background(isAtLeastOneOperationEnabled ? Color.blue : Color.gray)
@@ -221,6 +223,7 @@ struct ContentView: View {
                Int(lbdivision2) ?? 2 <= Int(ubdivision2) ?? 12
     }
 }
+
 
 struct GameView: View {
     let timeLimit: Int
@@ -386,8 +389,12 @@ struct GameView: View {
             case "-":
                 random1 = Int.random(in: subtractionLowerBound1...subtractionUpperBound1)
                 random2 = Int.random(in: subtractionLowerBound2...subtractionUpperBound2)
-                currentQuestion = "\(random1 + random2) - \(random2) = ?"
-                correctAnswer = random1
+                if random1 < random2 {
+                    swap(&random1, &random2)
+                }
+                currentQuestion = "\(random1) - \(random2) = ?"
+                correctAnswer = random1 - random2
+                //unnecessarily complicated logic before
             case "*":
                 random1 = Int.random(in: multiplicationLowerBound1...multiplicationUpperBound2)
                 random2 = Int.random(in: multiplicationLowerBound2...multiplicationUpperBound1)
@@ -455,7 +462,7 @@ struct CustomTextField: View {
             .padding(4)
             .background(Color(UIColor.systemBackground))
             .cornerRadius(5)
-            .frame(height: 25)
+            .frame(height: 27)
             .frame(width: 50)
             .overlay(
                 RoundedRectangle(cornerRadius: 5)
