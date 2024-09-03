@@ -389,12 +389,11 @@ struct GameView: View {
             case "-":
                 random1 = Int.random(in: subtractionLowerBound1...subtractionUpperBound1)
                 random2 = Int.random(in: subtractionLowerBound2...subtractionUpperBound2)
-                if random1 < random2 {
-                    swap(&random1, &random2)
-                }
-                currentQuestion = "\(random1) - \(random2) = ?"
-                correctAnswer = random1 - random2
-                //unnecessarily complicated logic before
+                currentQuestion = "\(random1 + random2) - \(random2) = ?"
+                correctAnswer = random1
+                //old algorithm is back rahhh
+                //the new one meant that there was a chance that the answer is 0
+                //so this is back hehe
             case "*":
                 random1 = Int.random(in: multiplicationLowerBound1...multiplicationUpperBound2)
                 random2 = Int.random(in: multiplicationLowerBound2...multiplicationUpperBound1)
