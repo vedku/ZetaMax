@@ -4,7 +4,7 @@ import SwiftUI
 struct ZetaMaxApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            HomeView()
         }
     }
 }
