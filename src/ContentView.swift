@@ -31,6 +31,11 @@ struct ContentView: View {
     private var isAtLeastOneOperationEnabled: Bool {
         return additionEnabled || subtractionEnabled || multiplicationEnabled || divisionEnabled
     }
+    
+    private var numberOfOperationsEnabled: Int {
+        [additionEnabled, subtractionEnabled, multiplicationEnabled, divisionEnabled].filter { $0 }.count
+    }
+//so that at least one operation is enabled at all times
 
     var body: some View {
         ScrollView {
@@ -39,10 +44,18 @@ struct ContentView: View {
                     .font(.largeTitle)
                     .fontWeight(.bold)
 
-                // Addition Toggle and Range
-                Toggle("Addition", isOn: $additionEnabled)
-                    .font(.title2)
-                    .fontWeight(.bold)
+                Toggle("Addition", isOn: Binding<Bool>(
+                    get: { additionEnabled },
+                    set: { newValue in
+                        if newValue {
+                            additionEnabled = true
+                        } else if numberOfOperationsEnabled > 1 {
+                            additionEnabled = false
+                        }
+                    }
+                ))
+                .font(.title2)
+                .fontWeight(.bold)
 
                 if additionEnabled {
                     VStack(alignment: .leading) {
@@ -66,10 +79,19 @@ struct ContentView: View {
                     }
                 }
 
-                // Subtraction Toggle and Range
-                Toggle("Subtraction", isOn: $subtractionEnabled)
-                    .font(.title2)
-                    .fontWeight(.bold)
+                Toggle("Subtraction", isOn: Binding<Bool>(
+                    get: { subtractionEnabled },
+                    set: { newValue in
+                        if newValue {
+                            subtractionEnabled = true
+                        } else if numberOfOperationsEnabled > 1 {
+                            subtractionEnabled = false
+                        }
+                    }
+                ))
+                .font(.title2)
+                .fontWeight(.bold)
+
 
                 if subtractionEnabled {
                     VStack(alignment: .leading) {
@@ -93,10 +115,19 @@ struct ContentView: View {
                     }
                 }
 
-                // Multiplication Toggle and Range
-                Toggle("Multiplication", isOn: $multiplicationEnabled)
-                    .font(.title2)
-                    .fontWeight(.bold)
+                Toggle("Multiplication", isOn: Binding<Bool>(
+                    get: { multiplicationEnabled },
+                    set: { newValue in
+                        if newValue {
+                            multiplicationEnabled = true
+                        } else if numberOfOperationsEnabled > 1 {
+                            multiplicationEnabled = false
+                        }
+                    }
+                ))
+                .font(.title2)
+                .fontWeight(.bold)
+
 
                 if multiplicationEnabled {
                     VStack(alignment: .leading) {
@@ -120,10 +151,18 @@ struct ContentView: View {
                     }
                 }
 
-                // Division Toggle and Range
-                Toggle("Division", isOn: $divisionEnabled)
-                    .font(.title2)
-                    .fontWeight(.bold)
+                Toggle("Division", isOn: Binding<Bool>(
+                    get: { divisionEnabled },
+                    set: { newValue in
+                        if newValue {
+                            divisionEnabled = true
+                        } else if numberOfOperationsEnabled > 1 {
+                            divisionEnabled = false
+                        }
+                    }
+                ))
+                .font(.title2)
+                .fontWeight(.bold)
 
                 if divisionEnabled {
                     VStack(alignment: .leading) {
@@ -149,6 +188,8 @@ struct ContentView: View {
 
                 // Time Limit Picker
                 Picker("Time Limit", selection: $timeLimit) {
+                    Text("30 seconds").tag(30)
+                    Text("60 seconds").tag(60)
                     Text("120 seconds").tag(120)
                     Text("300 seconds").tag(300)
                     Text("600 seconds").tag(600)

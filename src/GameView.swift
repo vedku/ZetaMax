@@ -211,12 +211,15 @@ struct GameView: View {
         } else {
             isNewHighScore = false
         }
-                var scores = UserDefaults.standard.array(forKey: "Scores") as? [[String: Any]] ?? []
-        scores.append(["date": Date(), "score": score])
+
+        // Include timeLimit in the saved score so I can have different time divisions saved
+        var scores = UserDefaults.standard.array(forKey: "Scores") as? [[String: Any]] ?? []
+        scores.append(["date": Date(), "score": score, "timeLimit": timeLimit])
         UserDefaults.standard.set(scores, forKey: "Scores")
-        
+
         isGameOver = true
     }
+
 
     func restartGame() {
         score = 0
