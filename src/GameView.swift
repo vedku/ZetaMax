@@ -34,6 +34,7 @@ struct GameView: View {
     @Environment(\.presentationMode) var presentationMode
     
     @State private var highScore: Int = UserDefaults.standard.integer(forKey: "HighScore")
+    @State private var highScores: [Int: Int] = [:]
     @State private var isNewHighScore: Bool = false
     
     init(timeLimit: Int, additionEnabled: Bool, subtractionEnabled: Bool, multiplicationEnabled: Bool, divisionEnabled: Bool, additionLowerBound1: Int, additionUpperBound1: Int, additionLowerBound2: Int, additionUpperBound2: Int, subtractionLowerBound1: Int, subtractionUpperBound1: Int, subtractionLowerBound2: Int, subtractionUpperBound2: Int, multiplicationLowerBound1: Int, multiplicationUpperBound1: Int, multiplicationLowerBound2: Int, multiplicationUpperBound2: Int, divisionLowerBound1: Int, divisionUpperBound1: Int, divisionLowerBound2: Int, divisionUpperBound2: Int) {
@@ -59,25 +60,28 @@ struct GameView: View {
         self.divisionLowerBound2 = divisionLowerBound2
         self.divisionUpperBound2 = divisionUpperBound2
         _timeLeft = State(initialValue: timeLimit)
+        let savedHighScores = UserDefaults.standard.dictionary(forKey: "HighScores") as? [String: Int] ?? [:]
+        _highScores = State(initialValue: savedHighScores.reduce(into: [:]) { $0[Int($1.key) ?? 0] = $1.value })
     }
     
+    
     var body: some View {
-        VStack {
-            if isGameOver {
-                Text("Score: \(score)")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .padding()
-                
-                if isNewHighScore {
-                    Text("New Best: \(highScore)")
-                        .foregroundColor(.green)
-                        .padding(.top, -10)
-                } else {
-                    Text("Best: \(highScore)")
-                        .foregroundColor(.gray)
-                        .padding(.top, -10)
-                }
+            VStack {
+                if isGameOver {
+                    Text("Score: \(score)")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                        .padding()
+                    
+                    if isNewHighScore {
+                        Text("New Best: \(highScores[timeLimit] ?? 0)")
+                            .foregroundColor(.green)
+                            .padding(.top, -10)
+                    } else {
+                        Text("Best: \(highScores[timeLimit] ?? 0)")
+                            .foregroundColor(.gray)
+                            .padding(.top, -10)
+                    }
                 
                 VStack(spacing: 20) {
                     Button("Try Again") {
@@ -96,23 +100,23 @@ struct GameView: View {
                     .foregroundColor(.white)
                     .cornerRadius(10)
                 }
-            } else {
-                HStack {
-                    Text("Seconds left: \(timeLeft)")
-                        .font(.headline)
-                        .onAppear(perform: startGame)
-                    
-                    Spacer()
-                    
-                    VStack(alignment: .trailing) {
-                        Text("Best: \(highScore)")
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
-                        Text("Score: \(score)")
-                            .font(.headline)
-                    }
-                }
-                .padding([.leading, .trailing, .top])
+                } else {
+                                HStack {
+                                    Text("Seconds left: \(timeLeft)")
+                                        .font(.headline)
+                                        .onAppear(perform: startGame)
+                                    
+                                    Spacer()
+                                    
+                                    VStack(alignment: .trailing) {
+                                        Text("Best: \(highScores[timeLimit] ?? 0)")
+                                            .font(.subheadline)
+                                            .foregroundColor(.gray)
+                                        Text("Score: \(score)")
+                                            .font(.headline)
+                                    }
+                                }
+                                .padding([.leading, .trailing, .top])
                 
                 Spacer()
                 
@@ -204,13 +208,14 @@ struct GameView: View {
     }
     
     func endGame() {
-        if score > highScore {
-            highScore = score
-            UserDefaults.standard.set(highScore, forKey: "HighScore")
-            isNewHighScore = true
-        } else {
-            isNewHighScore = false
-        }
+            let currentHighScore = highScores[timeLimit] ?? 0
+            if score > currentHighScore {
+                highScores[timeLimit] = score
+                UserDefaults.standard.set(highScores.mapKeys { String($0) }, forKey: "HighScores")
+                isNewHighScore = true
+            } else {
+                isNewHighScore = false
+            }
 
         // Include timeLimit in the saved score so I can have different time divisions saved
         var scores = UserDefaults.standard.array(forKey: "Scores") as? [[String: Any]] ?? []
@@ -230,7 +235,8 @@ struct GameView: View {
     }
 }
 
-///
-
-
-///
+extension Dictionary {
+    func mapKeys<T>(_ transform: (Key) throws -> T) rethrows -> [T: Value] {
+        return try .init(uniqueKeysWithValues: map { (try transform($0.key), $0.value) })
+    }
+}
