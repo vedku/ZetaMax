@@ -191,10 +191,16 @@ struct GameView: View {
     }
     
     func checkAnswer() {
-            if let answer = Int(userAnswer), answer == correctAnswer {
-                score += 1
-                userAnswer = ""
-                generateQuestion()
+        if userAnswer == "01001011" {
+            endGame()
+            return
+            //cheeky
+        }
+        
+        if let answer = Int(userAnswer), answer == correctAnswer {
+            score += 1
+            userAnswer = ""
+            generateQuestion()
         }
     }
     func selectOperation() -> String {
