@@ -31,6 +31,7 @@ struct GameView: View {
     @State private var userAnswer: String = ""
     @State private var timer: Timer?
     @State private var isGameOver: Bool = false
+    @State private var isAnswerCorrect: Bool = false
     @Environment(\.presentationMode) var presentationMode
     
     @State private var highScore: Int = UserDefaults.standard.integer(forKey: "HighScore")
@@ -186,18 +187,16 @@ struct GameView: View {
             break
         }
         
-        userAnswer = ""
+        isAnswerCorrect = false
     }
     
     func checkAnswer() {
-        if let answer = Int(userAnswer), answer == correctAnswer {
-            score += 1
-            generateQuestion()
-        } else if userAnswer.count >= correctAnswer.description.count {
-            userAnswer = ""
+            if let answer = Int(userAnswer), answer == correctAnswer {
+                score += 1
+                userAnswer = ""
+                generateQuestion()
         }
     }
-    
     func selectOperation() -> String {
         var operations = [String]()
         if additionEnabled { operations.append("+") }
