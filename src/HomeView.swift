@@ -32,6 +32,7 @@ struct HomeView: View {
     
     var body: some View {
         NavigationStack {
+            Spacer(minLength: 23)
             VStack(spacing: 20) {
                 Text("ZetaMax")
                     .font(.system(size: 36, weight: .medium))
@@ -95,9 +96,10 @@ struct HomeView: View {
 }
 
 
-struct HomeView_Previews_Alternate: PreviewProvider {
+struct HomeView_Previews: PreviewProvider {
     static var previews: some View {
-        HomeView()  
+        HomeView()
     }
 }
+
 

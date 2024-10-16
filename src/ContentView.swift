@@ -215,16 +215,16 @@ struct ContentView: View {
         }
     }
 
-    func validateRanges() -> Bool {
-        return Int(lbaddition1) ?? 2 <= Int(ubaddition1) ?? 100 &&
-               Int(lbaddition2) ?? 2 <= Int(ubaddition2) ?? 100 &&
-               Int(lbsubtraction1) ?? 2 <= Int(ubsubtraction1) ?? 100 &&
-               Int(lbsubtraction2) ?? 2 <= Int(ubsubtraction2) ?? 100 &&
-               Int(lbmultiplication1) ?? 2 <= Int(ubmultiplication1) ?? 12 &&
-               Int(lbmultiplication2) ?? 2 <= Int(ubmultiplication2) ?? 100 &&
-               Int(lbdivision1) ?? 2 <= Int(ubdivision1) ?? 100 &&
-               Int(lbdivision2) ?? 2 <= Int(ubdivision2) ?? 12
-    }
+//    func validateRanges() -> Bool {
+//        return Int(lbaddition1) ?? 2 <= Int(ubaddition1) ?? 100 &&
+//               Int(lbaddition2) ?? 2 <= Int(ubaddition2) ?? 100 &&
+//               Int(lbsubtraction1) ?? 2 <= Int(ubsubtraction1) ?? 100 &&
+//               Int(lbsubtraction2) ?? 2 <= Int(ubsubtraction2) ?? 100 &&
+//               Int(lbmultiplication1) ?? 2 <= Int(ubmultiplication1) ?? 12 &&
+//               Int(lbmultiplication2) ?? 2 <= Int(ubmultiplication2) ?? 100 &&
+//               Int(lbdivision1) ?? 2 <= Int(ubdivision1) ?? 100 &&
+//               Int(lbdivision2) ?? 2 <= Int(ubdivision2) ?? 12
+//    }
 }
 
 

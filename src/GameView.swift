@@ -162,25 +162,25 @@ struct GameView: View {
         
         switch operation {
         case "+":
-            random1 = Int.random(in: additionLowerBound1...additionUpperBound1)
-            random2 = Int.random(in: additionLowerBound2...additionUpperBound2)
+            random1 = Int.random(in: min(additionLowerBound1, additionUpperBound1)...max(additionLowerBound1, additionUpperBound1))
+            random2 = Int.random(in: min(additionLowerBound2, additionUpperBound2)...max(additionLowerBound2, additionUpperBound2))
             currentQuestion = "\(random1) + \(random2) = ?"
             correctAnswer = random1 + random2
         case "-":
-            random1 = Int.random(in: subtractionLowerBound1...subtractionUpperBound1)
-            random2 = Int.random(in: subtractionLowerBound2...subtractionUpperBound2)
-            currentQuestion = "\(random1 + random2) - \(random2) = ?"
-            correctAnswer = random1
+            random1 = Int.random(in: min(subtractionLowerBound1, subtractionUpperBound1)...max(subtractionLowerBound1, subtractionUpperBound1))
+            random2 = Int.random(in: min(subtractionLowerBound2, subtractionUpperBound2)...max(subtractionLowerBound2, subtractionUpperBound2))
+            currentQuestion = "\(random1) - \(random2) = ?"
+            correctAnswer = random1 - random2
         case "*":
-            random1 = Int.random(in: multiplicationLowerBound1...multiplicationUpperBound2)
-            random2 = Int.random(in: multiplicationLowerBound2...multiplicationUpperBound1)
+            random1 = Int.random(in: min(multiplicationLowerBound1, multiplicationUpperBound1)...max(multiplicationLowerBound1, multiplicationUpperBound1))
+            random2 = Int.random(in: min(multiplicationLowerBound2, multiplicationUpperBound2)...max(multiplicationLowerBound2, multiplicationUpperBound2))
             currentQuestion = "\(random1) * \(random2) = ?"
             correctAnswer = random1 * random2
         case "/":
             repeat {
-                random1 = Int.random(in: divisionLowerBound1...divisionUpperBound1)
-                random2 = Int.random(in: divisionLowerBound2...divisionUpperBound2)
-            } while random2 == 0 || random1 % random2 != 0
+                random1 = Int.random(in: min(divisionLowerBound1, divisionUpperBound1)...max(divisionLowerBound1, divisionUpperBound1))
+                random2 = Int.random(in: min(divisionLowerBound2, divisionUpperBound2)...max(divisionLowerBound2, divisionUpperBound2))
+            } while random2 == 0
             currentQuestion = "\(random1) / \(random2) = ?"
             correctAnswer = random1 / random2
         default:
@@ -245,3 +245,10 @@ extension Dictionary {
         return try .init(uniqueKeysWithValues: map { (try transform($0.key), $0.value) })
     }
 }
+
+
+//struct GameView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        GameView()
+//    }
+//}
