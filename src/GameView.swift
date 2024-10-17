@@ -178,11 +178,12 @@ struct GameView: View {
             correctAnswer = random1 * random2
         case "/":
             repeat {
-                random1 = Int.random(in: min(divisionLowerBound1, divisionUpperBound1)...max(divisionLowerBound1, divisionUpperBound1))
                 random2 = Int.random(in: min(divisionLowerBound2, divisionUpperBound2)...max(divisionLowerBound2, divisionUpperBound2))
-            } while random2 == 0
+                random1 = random2 * Int.random(in: 1...max(divisionUpperBound1 / random2, 1))
+            } while random2 == 0 || random1 > divisionUpperBound1 || random1 < divisionLowerBound1
             currentQuestion = "\(random1) / \(random2) = ?"
             correctAnswer = random1 / random2
+        
         default:
             break
         }
