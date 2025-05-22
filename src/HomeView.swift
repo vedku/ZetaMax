@@ -1,105 +1,124 @@
+
+
 import SwiftUI
 
 struct HomeView: View {
-    @AppStorage("additionEnabled") private var additionEnabled = true
-    @AppStorage("subtractionEnabled") private var subtractionEnabled = true
-    @AppStorage("multiplicationEnabled") private var multiplicationEnabled = true
-    @AppStorage("divisionEnabled") private var divisionEnabled = true
 
-    @AppStorage("lbaddition1") private var lbaddition1: String = "2"
-    @AppStorage("ubaddition1") private var ubaddition1: String = "100"
-    @AppStorage("lbaddition2") private var lbaddition2: String = "2"
-    @AppStorage("ubaddition2") private var ubaddition2: String = "100"
+    // MARK: – Environment & shared data
+    @EnvironmentObject private var settings: UserSettings
+    @StateObject          private var scores   = ScoreStore()
 
-    @AppStorage("lbsubtraction1") private var lbsubtraction1: String = "2"
-    @AppStorage("ubsubtraction1") private var ubsubtraction1: String = "100"
-    @AppStorage("lbsubtraction2") private var lbsubtraction2: String = "2"
-    @AppStorage("ubsubtraction2") private var ubsubtraction2: String = "100"
+    // MARK: – Persisted settings (the “22 ints/bools”)
+    // ── Time limit ─────────────────────────────────────────────
+    @AppStorage("timeLimit")                private var timeLimit                = 60
 
-    @AppStorage("lbmultiplication1") private var lbmultiplication1: String = "2"
-    @AppStorage("ubmultiplication1") private var ubmultiplication1: String = "12"
-    @AppStorage("lbmultiplication2") private var lbmultiplication2: String = "2"
-    @AppStorage("ubmultiplication2") private var ubmultiplication2: String = "100"
+    // ── Addition bounds & toggle ───────────────────────────────
+    @AppStorage("lowerAddition")            private var lowerAddition            = 1
+    @AppStorage("upperAddition")            private var upperAddition            = 20
+    @AppStorage("enableAddition")           private var enableAddition           = true
 
-    @AppStorage("lbdivision1") private var lbdivision1: String = "2"
-    @AppStorage("ubdivision1") private var ubdivision1: String = "100"
-    @AppStorage("lbdivision2") private var lbdivision2: String = "2"
-    @AppStorage("ubdivision2") private var ubdivision2: String = "12"
+    // ── Subtraction bounds & toggle ────────────────────────────
+    @AppStorage("lowerSubtraction")         private var lowerSubtraction         = 1
+    @AppStorage("upperSubtraction")         private var upperSubtraction         = 20
+    @AppStorage("enableSubtraction")        private var enableSubtraction        = true
 
-    @AppStorage("timeLimit") private var timeLimit: Int = 120
-    
+    // ── Multiplication bounds & toggle ─────────────────────────
+    @AppStorage("lowerMultiplication")      private var lowerMultiplication      = 1
+    @AppStorage("upperMultiplication")      private var upperMultiplication      = 12
+    @AppStorage("enableMultiplication")     private var enableMultiplication     = true
 
-    
+    // ── Division bounds & toggle ───────────────────────────────
+    @AppStorage("lowerDivision")            private var lowerDivision            = 1
+    @AppStorage("upperDivision")            private var upperDivision            = 12
+    @AppStorage("enableDivision")           private var enableDivision           = false
+
+    // MARK: – Local state
+    @State private var showOpsAlert = false
+
+    // MARK: – Body
     var body: some View {
         NavigationStack {
-            Spacer(minLength: 23)
-            VStack(spacing: 20) {
+            VStack(spacing: 32) {
+
+                // ── Title ──────────────────────────────────────
                 Text("ZetaMax")
-                    .font(.system(size: 36, weight: .medium))
+                    .font(.system(size: 64))
+                    .padding(.bottom, 250)
                 
-                Spacer()
-                
-                NavigationLink(destination: GameView(
-                    timeLimit: timeLimit,
-                    additionEnabled: additionEnabled,
-                    subtractionEnabled: subtractionEnabled,
-                    multiplicationEnabled: multiplicationEnabled,
-                    divisionEnabled: divisionEnabled,
-                    additionLowerBound1: Int(lbaddition1) ?? 2,
-                    additionUpperBound1: Int(ubaddition1) ?? 100,
-                    additionLowerBound2: Int(lbaddition2) ?? 2,
-                    additionUpperBound2: Int(ubaddition2) ?? 100,
-                    subtractionLowerBound1: Int(lbsubtraction1) ?? 2,
-                    subtractionUpperBound1: Int(ubsubtraction1) ?? 100,
-                    subtractionLowerBound2: Int(lbsubtraction2) ?? 2,
-                    subtractionUpperBound2: Int(ubsubtraction2) ?? 100,
-                    multiplicationLowerBound1: Int(lbmultiplication1) ?? 2,
-                    multiplicationUpperBound1: Int(ubmultiplication1) ?? 12,
-                    multiplicationLowerBound2: Int(lbmultiplication2) ?? 2,
-                    multiplicationUpperBound2: Int(ubmultiplication2) ?? 100,
-                    divisionLowerBound1: Int(lbdivision1) ?? 2,
-                    divisionUpperBound1: Int(ubdivision1) ?? 100,
-                    divisionLowerBound2: Int(lbdivision2) ?? 2,
-                    divisionUpperBound2: Int(ubdivision2) ?? 12
-                )) {
+                // ── Play button ───────────────────────────────
+                NavigationLink {
+                    GameView(config: gameConfig)
+                        .environmentObject(scores)
+                } label: {
                     Text("Play Game")
-                        .font(.system(size: 20))
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color(white: 0.9))
-                        .cornerRadius(5)
+                        .frame(maxWidth: 240)
                 }
-                
-                NavigationLink(destination: ContentView()) {
-                    Text("Settings")
-                        .font(.system(size: 20))
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color(white: 0.9))
-                        .cornerRadius(5)
-                }
-                
-                NavigationLink(destination: ScoreGraphView()) {
-                    Text("View Data")
-                        .font(.system(size: 20))
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color(white: 0.9))
-                        .cornerRadius(5)
+                .buttonStyle(.borderedProminent)
+                .disabled(!isAnyOperationEnabled)        // disable if no ops
+                .simultaneousGesture(TapGesture().onEnded {
+                    if !isAnyOperationEnabled { showOpsAlert = true }
+                })
+
+                // ── Settings & stats ──────────────────────────
+                NavigationLink("Settings") { ContentView() }
+                NavigationLink("Progress") {
+                    ScoreGraphView()
+                        .environmentObject(scores)
                 }
 
-                Spacer()
+                // ── Dark / light toggle ───────────────────────
+                Button {
+                    settings.isDarkMode.toggle()
+                } label: {
+                    Image(systemName: settings.isDarkMode ? "sun.max.fill"
+                                                          : "moon.fill")
+                        .font(.title2)
+                        .padding(12)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(settings.isDarkMode
+                                    ? "Switch to light mode"
+                                    : "Switch to dark mode")
+
+                Spacer(minLength: 24)
             }
             .padding()
+            .alert("Choose at least one operation",
+                   isPresented: $showOpsAlert) { Button("OK", role: .cancel) { } }
         }
+        // inject shared stores down the stack
+        .environmentObject(scores)
+    }
+
+    // MARK: – Helpers
+    /// Bundle up all settings into the struct GameView expects.
+    private var gameConfig: GameView.Config {
+        .init(
+            timeLimit:               timeLimit,
+            lowerAddition:           lowerAddition,
+            upperAddition:           upperAddition,
+            lowerSubtraction:        lowerSubtraction,
+            upperSubtraction:        upperSubtraction,
+            lowerMultiplication:     lowerMultiplication,
+            upperMultiplication:     upperMultiplication,
+            lowerDivision:           lowerDivision,
+            upperDivision:           upperDivision,
+            enableAddition:          enableAddition,
+            enableSubtraction:       enableSubtraction,
+            enableMultiplication:    enableMultiplication,
+            enableDivision:          enableDivision
+        )
+    }
+
+    /// Rejects play when every operation is off.
+    private var isAnyOperationEnabled: Bool {
+        enableAddition || enableSubtraction ||
+        enableMultiplication || enableDivision
     }
 }
 
-
-struct HomeView_Previews: PreviewProvider {
-    static var previews: some View {
-        HomeView()
-    }
+// MARK: – Preview
+#Preview {
+    HomeView()
+        .environmentObject(UserSettings())
 }
-
-

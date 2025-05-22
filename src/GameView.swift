@@ -1,255 +1,240 @@
+//
+//  GameView.swift
+//  ZetaMax
+//
+//
+
 import SwiftUI
+import Combine
 
+// MARK: – GameView
 struct GameView: View {
-    let timeLimit: Int
-    let additionEnabled: Bool
-    let subtractionEnabled: Bool
-    let multiplicationEnabled: Bool
-    let divisionEnabled: Bool
-    
-    let additionLowerBound1: Int
-    let additionUpperBound1: Int
-    let additionLowerBound2: Int
-    let additionUpperBound2: Int
-    let subtractionLowerBound1: Int
-    let subtractionUpperBound1: Int
-    let subtractionLowerBound2: Int
-    let subtractionUpperBound2: Int
-    let multiplicationLowerBound1: Int
-    let multiplicationUpperBound1: Int
-    let multiplicationLowerBound2: Int
-    let multiplicationUpperBound2: Int
-    let divisionLowerBound1: Int
-    let divisionUpperBound1: Int
-    let divisionLowerBound2: Int
-    let divisionUpperBound2: Int
-    
-    @State private var timeLeft: Int
-    @State private var score: Int = 0
-    @State private var currentQuestion: String = ""
-    @State private var correctAnswer: Int = 0
-    @State private var userAnswer: String = ""
-    @State private var timer: Timer?
-    @State private var isGameOver: Bool = false
-    @State private var isAnswerCorrect: Bool = false
-    @Environment(\.presentationMode) var presentationMode
-    
-    @State private var highScore: Int = UserDefaults.standard.integer(forKey: "HighScore")
-    @State private var highScores: [Int: Int] = [:]
-    @State private var isNewHighScore: Bool = false
-    
-    init(timeLimit: Int, additionEnabled: Bool, subtractionEnabled: Bool, multiplicationEnabled: Bool, divisionEnabled: Bool, additionLowerBound1: Int, additionUpperBound1: Int, additionLowerBound2: Int, additionUpperBound2: Int, subtractionLowerBound1: Int, subtractionUpperBound1: Int, subtractionLowerBound2: Int, subtractionUpperBound2: Int, multiplicationLowerBound1: Int, multiplicationUpperBound1: Int, multiplicationLowerBound2: Int, multiplicationUpperBound2: Int, divisionLowerBound1: Int, divisionUpperBound1: Int, divisionLowerBound2: Int, divisionUpperBound2: Int) {
-        self.timeLimit = timeLimit
-        self.additionEnabled = additionEnabled
-        self.subtractionEnabled = subtractionEnabled
-        self.multiplicationEnabled = multiplicationEnabled
-        self.divisionEnabled = divisionEnabled
-        self.additionLowerBound1 = additionLowerBound1
-        self.additionUpperBound1 = additionUpperBound1
-        self.additionLowerBound2 = additionLowerBound2
-        self.additionUpperBound2 = additionUpperBound2
-        self.subtractionLowerBound1 = subtractionLowerBound1
-        self.subtractionUpperBound1 = subtractionUpperBound1
-        self.subtractionLowerBound2 = subtractionLowerBound2
-        self.subtractionUpperBound2 = subtractionUpperBound2
-        self.multiplicationLowerBound1 = multiplicationLowerBound1
-        self.multiplicationUpperBound1 = multiplicationUpperBound1
-        self.multiplicationLowerBound2 = multiplicationLowerBound2
-        self.multiplicationUpperBound2 = multiplicationUpperBound2
-        self.divisionLowerBound1 = divisionLowerBound1
-        self.divisionUpperBound1 = divisionUpperBound1
-        self.divisionLowerBound2 = divisionLowerBound2
-        self.divisionUpperBound2 = divisionUpperBound2
-        _timeLeft = State(initialValue: timeLimit)
-        let savedHighScores = UserDefaults.standard.dictionary(forKey: "HighScores") as? [String: Int] ?? [:]
-        _highScores = State(initialValue: savedHighScores.reduce(into: [:]) { $0[Int($1.key) ?? 0] = $1.value })
+
+    // MARK: Config passed from HomeView
+    struct Config: Equatable {
+        let timeLimit:               Int
+
+        let lowerAddition:           Int
+        let upperAddition:           Int
+        let lowerSubtraction:        Int
+        let upperSubtraction:        Int
+        let lowerMultiplication:     Int
+        let upperMultiplication:     Int
+        let lowerDivision:           Int
+        let upperDivision:           Int
+
+        let enableAddition:          Bool
+        let enableSubtraction:       Bool
+        let enableMultiplication:    Bool
+        let enableDivision:          Bool
     }
-    
-    
+
+    // Injected on navigation
+    let config: Config
+
+    // MARK: – Environment
+    @Environment(\.dismiss)         private var dismiss
+    @EnvironmentObject              private var store: ScoreStore
+
+    // MARK: – State
+    @State private var timeLeft                       = 0
+    @State private var score                          = 0
+    @State private var currentQuestion                = ""
+    @State private var correctAnswer                  = 0
+    @State private var userAnswer                     = ""
+    @State private var isGameOver                     = false
+    @State private var isNewHighScore                 = false
+    @State private var timerCancellable: AnyCancellable?
+
+    @State private var highScores: [Int: Int] =
+        (UserDefaults.standard.dictionary(forKey: "HighScores") as? [String: Int])?
+        .reduce(into: [:]) { dict, pair in dict[Int(pair.key) ?? 0] = pair.value } ?? [:]
+
+    // MARK: – View body
     var body: some View {
-            VStack {
-                if isGameOver {
-                    Text("Score: \(score)")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                        .padding()
-                    
-                    if isNewHighScore {
-                        Text("New Best: \(highScores[timeLimit] ?? 0)")
-                            .foregroundColor(.green)
-                            .padding(.top, -10)
-                    } else {
-                        Text("Best: \(highScores[timeLimit] ?? 0)")
-                            .foregroundColor(.gray)
-                            .padding(.top, -10)
-                    }
-                
-                VStack(spacing: 20) {
-                    Button("Try Again") {
-                        restartGame()
-                    }
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-                    
-                    Button("Change Settings") {
-                        presentationMode.wrappedValue.dismiss()
-                    }
-                    .padding()
-                    .background(Color.gray)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-                }
-                } else {
-                                HStack {
-                                    Text("Seconds left: \(timeLeft)")
-                                        .font(.headline)
-                                        .onAppear(perform: startGame)
-                                    
-                                    Spacer()
-                                    
-                                    VStack(alignment: .trailing) {
-                                        Text("Best: \(highScores[timeLimit] ?? 0)")
-                                            .font(.subheadline)
-                                            .foregroundColor(.gray)
-                                        Text("Score: \(score)")
-                                            .font(.headline)
-                                    }
-                                }
-                                .padding([.leading, .trailing, .top])
-                
-                Spacer()
-                
-                VStack(spacing: 20) {
-                    Text(currentQuestion)
-                        .font(.largeTitle)
-                    
-                    TextField("Answer", text: $userAnswer)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .keyboardType(.numberPad)
-                        .multilineTextAlignment(.center)
-                        .onChange(of: userAnswer) {
-                            checkAnswer()
-                        }
-                }
-                
-                Spacer()
-            }
-        }
-        .onDisappear {
-            timer?.invalidate()
-        }
-    }
-    
-    func startGame() {
-        generateQuestion()
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-            if self.timeLeft > 0 {
-                self.timeLeft -= 1
+        VStack(spacing: 24) {
+
+            headerView
+
+            Spacer()
+
+            if isGameOver {
+                gameOverView
             } else {
-                self.timer?.invalidate()
-                endGame()
-            }
-        }
-    }
-    
-    func generateQuestion() {
-        let operation = selectOperation()
-        
-        var random1: Int
-        var random2: Int
-        
-        switch operation {
-        case "+":
-            random1 = Int.random(in: min(additionLowerBound1, additionUpperBound1)...max(additionLowerBound1, additionUpperBound1))
-            random2 = Int.random(in: min(additionLowerBound2, additionUpperBound2)...max(additionLowerBound2, additionUpperBound2))
-            currentQuestion = "\(random1) + \(random2) = ?"
-            correctAnswer = random1 + random2
-        case "-":
-            random1 = Int.random(in: min(subtractionLowerBound1, subtractionUpperBound1)...max(subtractionLowerBound1, subtractionUpperBound1))
-            random2 = Int.random(in: min(subtractionLowerBound2, subtractionUpperBound2)...max(subtractionLowerBound2, subtractionUpperBound2))
-            currentQuestion = "\(random1) - \(random2) = ?"
-            correctAnswer = random1 - random2
-        case "*":
-            random1 = Int.random(in: min(multiplicationLowerBound1, multiplicationUpperBound1)...max(multiplicationLowerBound1, multiplicationUpperBound1))
-            random2 = Int.random(in: min(multiplicationLowerBound2, multiplicationUpperBound2)...max(multiplicationLowerBound2, multiplicationUpperBound2))
-            currentQuestion = "\(random1) * \(random2) = ?"
-            correctAnswer = random1 * random2
-        case "/":
-            repeat {
-                random2 = Int.random(in: min(divisionLowerBound2, divisionUpperBound2)...max(divisionLowerBound2, divisionUpperBound2))
-                random1 = random2 * Int.random(in: 1...max(divisionUpperBound1 / random2, 1))
-            } while random2 == 0 || random1 > divisionUpperBound1 || random1 < divisionLowerBound1
-            currentQuestion = "\(random1) / \(random2) = ?"
-            correctAnswer = random1 / random2
-        
-        default:
-            break
-        }
-        
-        isAnswerCorrect = false
-    }
-    
-    func checkAnswer() {
-        if userAnswer == "01001011" {
-            endGame()
-            return
-            //cheeky
-        }
-        
-        if let answer = Int(userAnswer), answer == correctAnswer {
-            score += 1
-            userAnswer = ""
-            generateQuestion()
-        }
-    }
-    func selectOperation() -> String {
-        var operations = [String]()
-        if additionEnabled { operations.append("+") }
-        if subtractionEnabled { operations.append("-") }
-        if multiplicationEnabled { operations.append("*") }
-        if divisionEnabled { operations.append("/") }
-        return operations.randomElement() ?? "+"
-    }
-    
-    func endGame() {
-            let currentHighScore = highScores[timeLimit] ?? 0
-            if score > currentHighScore {
-                highScores[timeLimit] = score
-                UserDefaults.standard.set(highScores.mapKeys { String($0) }, forKey: "HighScores")
-                isNewHighScore = true
-            } else {
-                isNewHighScore = false
+                gameInProgressView
             }
 
-        // Include timeLimit in the saved score so I can have different time divisions saved
-        var scores = UserDefaults.standard.array(forKey: "Scores") as? [[String: Any]] ?? []
-        scores.append(["date": Date(), "score": score, "timeLimit": timeLimit])
-        UserDefaults.standard.set(scores, forKey: "Scores")
+            Spacer()
+        }
+        .padding()
+        .navigationBarBackButtonHidden(!isGameOver)   // block premature exit
+        .onAppear(perform: startGameOnce)
+        .onDisappear { timerCancellable?.cancel() }
+    }
+
+    // MARK: – Sub-views
+    private var headerView: some View {
+        HStack {
+            Text("⏱ \(timeLeft)s")
+            Spacer()
+            VStack(alignment: .trailing) {
+                Text("Best: \(highScores[config.timeLimit, default: 0])")
+                Text("Score: \(score)")
+            }
+        }
+        .font(.headline)
+    }
+
+    private var gameInProgressView: some View {
+        VStack(spacing: 32) {
+            Text(currentQuestion)
+                .font(.largeTitle.bold())
+                .minimumScaleFactor(0.5)
+
+            TextField("Answer", text: $userAnswer)
+                .textFieldStyle(.roundedBorder)
+                .keyboardType(.numbersAndPunctuation)
+                .multilineTextAlignment(.center)
+                .onChange(of: userAnswer) { _ in checkAnswer() }
+                .submitLabel(.done)
+                .onSubmit(checkAnswer)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private var gameOverView: some View {
+        VStack(spacing: 32) {
+            Text("Final Score \(score)")
+                .font(.largeTitle.bold())
+
+            Text(isNewHighScore ? "🎉 New High Score!" :
+                 "Best: \(highScores[config.timeLimit, default: 0])")
+                .font(.title3.weight(.medium))
+                .foregroundStyle(isNewHighScore ? .green : .secondary)
+
+            Button("Play Again", action: restartGame)
+                .buttonStyle(.borderedProminent)
+
+            Button("Back to Menu", role: .cancel) { dismiss() }
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    // MARK: – Game lifecycle
+    private func startGameOnce() {
+        guard timerCancellable == nil else { return }     // ensure single start
+        timeLeft = config.timeLimit
+        score = 0
+        isGameOver = false
+        isNewHighScore = false
+        generateQuestion()
+
+        timerCancellable = Timer
+            .publish(every: 1, on: .main, in: .common)
+            .autoconnect()
+            .sink { _ in
+                timeLeft -= 1
+                if timeLeft == 0 {
+                    timerCancellable?.cancel()
+                    endGame()
+                }
+            }
+    }
+
+    private func restartGame() {
+        userAnswer = ""
+        timerCancellable?.cancel()
+        startGameOnce()
+    }
+
+    private func endGame() {
+        // High-score update
+        if score > highScores[config.timeLimit, default: 0] {
+            highScores[config.timeLimit] = score
+            let stringKeyed = highScores.reduce(into: [String: Int]()) { dict, pair in
+                dict[String(pair.key)] = pair.value
+            }
+            UserDefaults.standard.set(stringKeyed, forKey: "HighScores")
+            isNewHighScore = true
+        }
+
+        // Persist in score history
+        store.add(ScoreEntry(id: .init(),
+                             date: .now,
+                             score: score,
+                             timeLimit: config.timeLimit))
 
         isGameOver = true
     }
 
-
-    func restartGame() {
-        score = 0
-        timeLeft = timeLimit
-        isGameOver = false
-        isNewHighScore = false
-        startGame()
+    // MARK: – Question generation & answer checking
+    private func checkAnswer() {
+        guard let typed = Int(userAnswer),
+              typed == correctAnswer else { return }
+        score += 1
+        userAnswer = ""
+        generateQuestion()
     }
+
+    private func generateQuestion() {
+        // Derive enabled operations
+        var ops: [Operator] = []
+        if config.enableAddition       { ops.append(.add) }
+        if config.enableSubtraction    { ops.append(.sub) }
+        if config.enableMultiplication { ops.append(.mul) }
+        if config.enableDivision       { ops.append(.div) }
+
+        guard let op = ops.randomElement() else {
+            currentQuestion = "No operations enabled!"
+            correctAnswer   = Int.min
+            return
+        }
+
+        switch op {
+        case .add:
+            let a = Int.random(in: config.lowerAddition...config.upperAddition)
+            let b = Int.random(in: config.lowerAddition...config.upperAddition)
+            currentQuestion = "\(a) + \(b) = ?"
+            correctAnswer   = a + b
+
+        case .sub:
+            var a = Int.random(in: config.lowerSubtraction...config.upperSubtraction)
+            var b = Int.random(in: config.lowerSubtraction...config.upperSubtraction)
+            if b > a { swap(&a, &b) }                      // keep answer ≥ 0
+            currentQuestion = "\(a) − \(b) = ?"
+            correctAnswer   = a - b
+
+        case .mul:
+            let a = Int.random(in: config.lowerMultiplication...config.upperMultiplication)
+            let b = Int.random(in: config.lowerMultiplication...config.upperMultiplication)
+            currentQuestion = "\(a) × \(b) = ?"
+            correctAnswer   = a * b
+
+        case .div:
+            let divisor = Int.random(in: max(1, config.lowerDivision)...max(1, config.upperDivision))
+            let quotient = Int.random(in: max(1, config.lowerDivision)...max(1, config.upperDivision))
+            let dividend = divisor * quotient              // ensures whole-number answer
+            currentQuestion = "\(dividend) ÷ \(divisor) = ?"
+            correctAnswer   = quotient
+        }
+    }
+
+    // MARK: – Helpers
+    private enum Operator { case add, sub, mul, div }
 }
 
-extension Dictionary {
-    func mapKeys<T>(_ transform: (Key) throws -> T) rethrows -> [T: Value] {
-        return try .init(uniqueKeysWithValues: map { (try transform($0.key), $0.value) })
+// MARK: – Preview
+#Preview {
+    NavigationStack {
+        GameView(config: .init(
+            timeLimit: 30,
+            lowerAddition: 1, upperAddition: 20,
+            lowerSubtraction: 1, upperSubtraction: 20,
+            lowerMultiplication: 1, upperMultiplication: 12,
+            lowerDivision: 1, upperDivision: 12,
+            enableAddition: true, enableSubtraction: true,
+            enableMultiplication: true, enableDivision: true
+        ))
+        .environmentObject(ScoreStore())
     }
 }
-
-
-//struct GameView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        GameView()
-//    }
-//}

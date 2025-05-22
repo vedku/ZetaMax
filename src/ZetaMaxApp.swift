@@ -2,12 +2,13 @@ import SwiftUI
 
 @main
 struct ZetaMaxApp: App {
-    @AppStorage("isDarkMode") private var isDarkMode = false
+    @StateObject private var settings = UserSettings()
 
     var body: some Scene {
         WindowGroup {
             HomeView()
-                .preferredColorScheme(isDarkMode ? .dark : .light)
+                .environmentObject(settings)
+                .preferredColorScheme(settings.isDarkMode ? .dark : .light)
         }
     }
 }
