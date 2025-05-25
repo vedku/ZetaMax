@@ -2,71 +2,80 @@ import SwiftUI
 import Combine
 
 // MARK: – GameView
+/// The main quiz screen. Generates questions using the exact bounds / toggles
+/// the user picked in **HomeView** and times the round.
 struct GameView: View {
 
-    // MARK: Config passed from HomeView
+    // MARK: – Configuration coming from HomeView
     struct Config: Equatable {
-        let timeLimit:               Int
+        let timeLimit: Int
 
-        let lowerAddition:           Int
-        let upperAddition:           Int
-        let lowerSubtraction:        Int
-        let upperSubtraction:        Int
-        let lowerMultiplication:     Int
-        let upperMultiplication:     Int
-        let lowerDivision:           Int
-        let upperDivision:           Int
+        // Separate ranges for each operand of each operation
+        let lowerAddition1: Int
+        let upperAddition1: Int
+        let lowerAddition2: Int
+        let upperAddition2: Int
+        
+        let lowerSubtraction1: Int
+        let upperSubtraction1: Int
+        let lowerSubtraction2: Int
+        let upperSubtraction2: Int
+        
+        let lowerMultiplication1: Int
+        let upperMultiplication1: Int
+        let lowerMultiplication2: Int
+        let upperMultiplication2: Int
+        
+        let lowerDivision1: Int
+        let upperDivision1: Int
+        let lowerDivision2: Int
+        let upperDivision2: Int
 
-        let enableAddition:          Bool
-        let enableSubtraction:       Bool
-        let enableMultiplication:    Bool
-        let enableDivision:          Bool
+        let enableAddition: Bool
+        let enableSubtraction: Bool
+        let enableMultiplication: Bool
+        let enableDivision: Bool
     }
 
-    // Injected on navigation
+    // Injected when we navigate from HomeView → GameView.
     let config: Config
 
     // MARK: – Environment
-    @Environment(\.dismiss)         private var dismiss
-    @EnvironmentObject              private var store: ScoreStore
+    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var store: ScoreStore
 
-    // MARK: – State
-    @State private var timeLeft                       = 0
-    @State private var score                          = 0
-    @State private var currentQuestion                = ""
-    @State private var correctAnswer                  = 0
-    @State private var userAnswer                     = ""
-    @State private var isGameOver                     = false
-    @State private var isNewHighScore                 = false
+    // MARK: – Game‑state
+    @State private var timeLeft = 0
+    @State private var score = 0
+
+    @State private var currentQuestion = ""
+    @State private var correctAnswer = 0
+    @State private var userAnswer = ""
+
+    @State private var isGameOver = false
+    @State private var isNewHighScore = false
     @State private var timerCancellable: AnyCancellable?
 
+    // Persisted best scores per time‑limit (keyed by seconds)
     @State private var highScores: [Int: Int] =
         (UserDefaults.standard.dictionary(forKey: "HighScores") as? [String: Int])?
         .reduce(into: [:]) { dict, pair in dict[Int(pair.key) ?? 0] = pair.value } ?? [:]
 
-    // MARK: – View body
+    // MARK: – Body
     var body: some View {
         VStack(spacing: 24) {
-
             headerView
-
             Spacer()
-
-            if isGameOver {
-                gameOverView
-            } else {
-                gameInProgressView
-            }
-
+            if isGameOver { gameOverView } else { gameInProgressView }
             Spacer()
         }
         .padding()
-        .navigationBarBackButtonHidden(!isGameOver)   // block premature exit
+        .navigationBarBackButtonHidden(!isGameOver)   // prevent rage‑quits mid‑round 😉
         .onAppear(perform: startGameOnce)
         .onDisappear { timerCancellable?.cancel() }
     }
 
-    // MARK: – Sub-views
+    // MARK: – Sub‑views
     private var headerView: some View {
         HStack {
             Text("⏱ \(timeLeft)s")
@@ -87,7 +96,7 @@ struct GameView: View {
 
             TextField("Answer", text: $userAnswer)
                 .textFieldStyle(.roundedBorder)
-                .keyboardType(.numberPad)          // number-only keyboard
+                .keyboardType(.numberPad)              // 👉 pure number keyboard
                 .multilineTextAlignment(.center)
                 .onChange(of: userAnswer) {
                     checkAnswer()
@@ -118,15 +127,14 @@ struct GameView: View {
 
     // MARK: – Game lifecycle
     private func startGameOnce() {
-        guard timerCancellable == nil else { return }     // ensure single start
+        guard timerCancellable == nil else { return }           // only start once
         timeLeft = config.timeLimit
         score = 0
         isGameOver = false
         isNewHighScore = false
         generateQuestion()
 
-        timerCancellable = Timer
-            .publish(every: 1, on: .main, in: .common)
+        timerCancellable = Timer.publish(every: 1, on: .main, in: .common)
             .autoconnect()
             .sink { _ in
                 timeLeft -= 1
@@ -144,7 +152,7 @@ struct GameView: View {
     }
 
     private func endGame() {
-        // High-score update
+        // Update high‑score
         if score > highScores[config.timeLimit, default: 0] {
             highScores[config.timeLimit] = score
             let stringKeyed = highScores.reduce(into: [String: Int]()) { dict, pair in
@@ -154,68 +162,63 @@ struct GameView: View {
             isNewHighScore = true
         }
 
-        // Persist in score history
-        store.add(ScoreEntry(id: .init(),
-                             date: .now,
-                             score: score,
-                             timeLimit: config.timeLimit))
-
+        // Persist in history
+        store.add(ScoreEntry(id: .init(), date: .now, score: score, timeLimit: config.timeLimit))
         isGameOver = true
     }
 
-    // MARK: – Question generation & answer checking
+    // MARK: – Question generation / checking
     private func checkAnswer() {
-        guard let typed = Int(userAnswer),
-              typed == correctAnswer else { return }
+        guard let typed = Int(userAnswer), typed == correctAnswer else { return }
         score += 1
         userAnswer = ""
         generateQuestion()
     }
 
     private func generateQuestion() {
-        // Derive enabled operations
+        // Figure out which operators are enabled
         var ops: [Operator] = []
-        if config.enableAddition       { ops.append(.add) }
-        if config.enableSubtraction    { ops.append(.sub) }
+        if config.enableAddition { ops.append(.add) }
+        if config.enableSubtraction { ops.append(.sub) }
         if config.enableMultiplication { ops.append(.mul) }
-        if config.enableDivision       { ops.append(.div) }
+        if config.enableDivision { ops.append(.div) }
 
         guard let op = ops.randomElement() else {
             currentQuestion = "No operations enabled!"
-            correctAnswer   = Int.min
+            correctAnswer = Int.min
             return
         }
 
         switch op {
         case .add:
-            let a = Int.random(in: config.lowerAddition...config.upperAddition)
-            let b = Int.random(in: config.lowerAddition...config.upperAddition)
+            let a = Int.random(in: config.lowerAddition1...config.upperAddition1)
+            let b = Int.random(in: config.lowerAddition2...config.upperAddition2)
             currentQuestion = "\(a) + \(b) = ?"
-            correctAnswer   = a + b
+            correctAnswer = a + b
 
         case .sub:
-            var a = Int.random(in: config.lowerSubtraction...config.upperSubtraction)
-            var b = Int.random(in: config.lowerSubtraction...config.upperSubtraction)
-            if b > a { swap(&a, &b) }                      // keep answer ≥ 0
+            var a = Int.random(in: config.lowerSubtraction1...config.upperSubtraction1)
+            var b = Int.random(in: config.lowerSubtraction2...config.upperSubtraction2)
+            if b > a { swap(&a, &b) }                  // keep non‑negative answer
             currentQuestion = "\(a) − \(b) = ?"
-            correctAnswer   = a - b
+            correctAnswer = a - b
 
         case .mul:
-            let a = Int.random(in: config.lowerMultiplication...config.upperMultiplication)
-            let b = Int.random(in: config.lowerMultiplication...config.upperMultiplication)
+            let a = Int.random(in: config.lowerMultiplication1...config.upperMultiplication1)
+            let b = Int.random(in: config.lowerMultiplication2...config.upperMultiplication2)
             currentQuestion = "\(a) × \(b) = ?"
-            correctAnswer   = a * b
+            correctAnswer = a * b
 
         case .div:
-            let divisor = Int.random(in: max(1, config.lowerDivision)...max(1, config.upperDivision))
-            let quotient = Int.random(in: max(1, config.lowerDivision)...max(1, config.upperDivision))
-            let dividend = divisor * quotient              // ensures whole-number answer
+            let divisor = Int.random(in: max(1, config.lowerDivision2)...max(1, config.upperDivision2))
+            let quotient = Int.random(in: max(1, config.lowerDivision1)...max(1, config.upperDivision1))
+            let dividend = divisor * quotient          // ensures whole‑number answer
             currentQuestion = "\(dividend) ÷ \(divisor) = ?"
-            correctAnswer   = quotient
+            correctAnswer = quotient
         }
     }
 
-    // MARK: – Helpers
+    // MARK: – Internal helpers
     private enum Operator { case add, sub, mul, div }
 }
 
@@ -224,10 +227,14 @@ struct GameView: View {
     NavigationStack {
         GameView(config: .init(
             timeLimit: 30,
-            lowerAddition: 1, upperAddition: 20,
-            lowerSubtraction: 1, upperSubtraction: 20,
-            lowerMultiplication: 1, upperMultiplication: 12,
-            lowerDivision: 1, upperDivision: 12,
+            lowerAddition1: 1, upperAddition1: 20,
+            lowerAddition2: 1, upperAddition2: 20,
+            lowerSubtraction1: 1, upperSubtraction1: 20,
+            lowerSubtraction2: 1, upperSubtraction2: 20,
+            lowerMultiplication1: 1, upperMultiplication1: 12,
+            lowerMultiplication2: 1, upperMultiplication2: 12,
+            lowerDivision1: 1, upperDivision1: 12,
+            lowerDivision2: 1, upperDivision2: 12,
             enableAddition: true, enableSubtraction: true,
             enableMultiplication: true, enableDivision: true
         ))

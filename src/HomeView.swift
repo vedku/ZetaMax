@@ -1,36 +1,42 @@
-
-
 import SwiftUI
 
 struct HomeView: View {
 
     // MARK: – Environment & shared data
     @EnvironmentObject private var settings: UserSettings
-    @StateObject          private var scores   = ScoreStore()
+    @StateObject private var scores = ScoreStore()
 
-    // MARK: – Persisted settings (the “22 ints/bools”)
+    // MARK: – Persisted settings (the "22 ints/bools")
     // ── Time limit ─────────────────────────────────────────────
-    @AppStorage("timeLimit")                private var timeLimit                = 60
+    @AppStorage("timeLimit") private var timeLimit = 60
 
-    // ── Addition bounds & toggle ───────────────────────────────
-    @AppStorage("lowerAddition")            private var lowerAddition            = 1
-    @AppStorage("upperAddition")            private var upperAddition            = 20
-    @AppStorage("enableAddition")           private var enableAddition           = true
+    // ── Addition settings (pulled from ContentView) ───────────────
+    @AppStorage("additionEnabled") private var enableAddition = true
+    @AppStorage("lbaddition1") private var lbaddition1: String = "2"
+    @AppStorage("ubaddition1") private var ubaddition1: String = "100"
+    @AppStorage("lbaddition2") private var lbaddition2: String = "2"
+    @AppStorage("ubaddition2") private var ubaddition2: String = "100"
 
-    // ── Subtraction bounds & toggle ────────────────────────────
-    @AppStorage("lowerSubtraction")         private var lowerSubtraction         = 1
-    @AppStorage("upperSubtraction")         private var upperSubtraction         = 20
-    @AppStorage("enableSubtraction")        private var enableSubtraction        = true
+    // ── Subtraction settings ──────────────────────────────────────
+    @AppStorage("subtractionEnabled") private var enableSubtraction = true
+    @AppStorage("lbsubtraction1") private var lbsubtraction1: String = "2"
+    @AppStorage("ubsubtraction1") private var ubsubtraction1: String = "100"
+    @AppStorage("lbsubtraction2") private var lbsubtraction2: String = "2"
+    @AppStorage("ubsubtraction2") private var ubsubtraction2: String = "100"
 
-    // ── Multiplication bounds & toggle ─────────────────────────
-    @AppStorage("lowerMultiplication")      private var lowerMultiplication      = 1
-    @AppStorage("upperMultiplication")      private var upperMultiplication      = 12
-    @AppStorage("enableMultiplication")     private var enableMultiplication     = true
+    // ── Multiplication settings ───────────────────────────────────
+    @AppStorage("multiplicationEnabled") private var enableMultiplication = true
+    @AppStorage("lbmultiplication1") private var lbmultiplication1: String = "2"
+    @AppStorage("ubmultiplication1") private var ubmultiplication1: String = "12"
+    @AppStorage("lbmultiplication2") private var lbmultiplication2: String = "2"
+    @AppStorage("ubmultiplication2") private var ubmultiplication2: String = "100"
 
-    // ── Division bounds & toggle ───────────────────────────────
-    @AppStorage("lowerDivision")            private var lowerDivision            = 1
-    @AppStorage("upperDivision")            private var upperDivision            = 12
-    @AppStorage("enableDivision")           private var enableDivision           = false
+    // ── Division settings ─────────────────────────────────────────
+    @AppStorage("divisionEnabled") private var enableDivision = true
+    @AppStorage("lbdivision1") private var lbdivision1: String = "2"
+    @AppStorage("ubdivision1") private var ubdivision1: String = "100"
+    @AppStorage("lbdivision2") private var lbdivision2: String = "2"
+    @AppStorage("ubdivision2") private var ubdivision2: String = "12"
 
     // MARK: – Local state
     @State private var showOpsAlert = false
@@ -94,19 +100,36 @@ struct HomeView: View {
     /// Bundle up all settings into the struct GameView expects.
     private var gameConfig: GameView.Config {
         .init(
-            timeLimit:               timeLimit,
-            lowerAddition:           lowerAddition,
-            upperAddition:           upperAddition,
-            lowerSubtraction:        lowerSubtraction,
-            upperSubtraction:        upperSubtraction,
-            lowerMultiplication:     lowerMultiplication,
-            upperMultiplication:     upperMultiplication,
-            lowerDivision:           lowerDivision,
-            upperDivision:           upperDivision,
-            enableAddition:          enableAddition,
-            enableSubtraction:       enableSubtraction,
-            enableMultiplication:    enableMultiplication,
-            enableDivision:          enableDivision
+            timeLimit: timeLimit,
+            
+            // Pass individual operand ranges for addition
+            lowerAddition1: Int(lbaddition1) ?? 2,
+            upperAddition1: Int(ubaddition1) ?? 100,
+            lowerAddition2: Int(lbaddition2) ?? 2,
+            upperAddition2: Int(ubaddition2) ?? 100,
+            
+            // Pass individual operand ranges for subtraction
+            lowerSubtraction1: Int(lbsubtraction1) ?? 2,
+            upperSubtraction1: Int(ubsubtraction1) ?? 100,
+            lowerSubtraction2: Int(lbsubtraction2) ?? 2,
+            upperSubtraction2: Int(ubsubtraction2) ?? 100,
+            
+            // Pass individual operand ranges for multiplication
+            lowerMultiplication1: Int(lbmultiplication1) ?? 2,
+            upperMultiplication1: Int(ubmultiplication1) ?? 12,
+            lowerMultiplication2: Int(lbmultiplication2) ?? 2,
+            upperMultiplication2: Int(ubmultiplication2) ?? 100,
+            
+            // Pass individual operand ranges for division
+            lowerDivision1: Int(lbdivision1) ?? 2,
+            upperDivision1: Int(ubdivision1) ?? 100,
+            lowerDivision2: Int(lbdivision2) ?? 2,
+            upperDivision2: Int(ubdivision2) ?? 100,
+            
+            enableAddition: enableAddition,
+            enableSubtraction: enableSubtraction,
+            enableMultiplication: enableMultiplication,
+            enableDivision: enableDivision
         )
     }
 
