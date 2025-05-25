@@ -1,9 +1,3 @@
-//
-//  GameView.swift
-//  ZetaMax
-//
-//
-
 import SwiftUI
 import Combine
 
@@ -93,9 +87,11 @@ struct GameView: View {
 
             TextField("Answer", text: $userAnswer)
                 .textFieldStyle(.roundedBorder)
-                .keyboardType(.numbersAndPunctuation)
+                .keyboardType(.numberPad)          // number-only keyboard
                 .multilineTextAlignment(.center)
-                .onChange(of: userAnswer) { _ in checkAnswer() }
+                .onChange(of: userAnswer) {
+                    checkAnswer()
+                }
                 .submitLabel(.done)
                 .onSubmit(checkAnswer)
         }

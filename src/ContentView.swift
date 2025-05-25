@@ -24,7 +24,7 @@ struct ContentView: View {
     @AppStorage("lbdivision1") private var lbdivision1: String = "2"
     @AppStorage("ubdivision1") private var ubdivision1: String = "100"
     @AppStorage("lbdivision2") private var lbdivision2: String = "2"
-    @AppStorage("ubdivision2") private var ubdivision2: String = "12"
+    @AppStorage("ubdivision2") private var ubdivision2: String = "100"
 
     @AppStorage("timeLimit") private var timeLimit: Int = 120
     @AppStorage("isDarkMode") private var isDarkMode = false
